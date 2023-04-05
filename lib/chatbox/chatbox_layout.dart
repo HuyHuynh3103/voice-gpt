@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import "package:uuid/uuid.dart";
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:voice_gpt/common/colors.dart';
+import 'package:voice_gpt/utils/app_theme.dart';
+import 'package:chatview/chatview.dart';
+import 'package:flutter_config/flutter_config.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
+import 'package:voice_gpt/common/constants.dart';
 
 class ChatBoxLayout extends StatefulWidget {
   @override
@@ -13,49 +14,136 @@ class ChatBoxLayout extends StatefulWidget {
 }
 
 class _ChatBoxLayoutState extends State<ChatBoxLayout> {
-  final List<types.Message> _messages = [];
-  final _user = types.User(id: const Uuid().v4());
+  AppTheme theme = LightTheme();
+  bool isDarkTheme = false;
   late OpenAI openAI;
-  final tController = StreamController<CTResponse?>.broadcast();
+  late ChatController _chatController;
+
+  @override
+  void initState() {
+    super.initState();
+    openAI = OpenAI.instance.build(
+      token: FlutterConfig.get('OPENAI_API_KEY'),
+      baseOption: HttpSetup(
+        receiveTimeout: const Duration(seconds: 5),
+      ),
+      isLog: true,
+    );
+
+    _chatController = ChatController(
+      initialMessageList: [],
+      scrollController: ScrollController(
+        keepScrollOffset: true,
+      ),
+      chatUsers: [user, bot],
+    );
+  }
+
+  @override
+  void dispose() {
+    _chatController.dispose();
+    super.dispose();
+  }
+
+  Future<ChatCTResponse?> _openAIChatCompletion() async {
+    final messages = _chatController.initialMessageList
+        .map((e) => Map.of({
+              "role": e.sendBy == user.id ? "user" : "assistant",
+              "content": e.message
+            }))
+        .toList();
+    final newMessageId = const Uuid().v4();
+    final request = ChatCompleteText(
+      messages: messages,
+      maxToken: 200,
+      model: ChatModel.ChatGptTurbo0301Model,
+    );
+    final response = await openAI.onChatCompletion(request: request);
+    return response;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Chat(
-        messages: _messages,
-        onSendPressed: _handleSendPressed,
-        user: _user,
-        theme: const DefaultChatTheme(
-          inputTextColor: tBlackColor,
-          inputBackgroundColor: tGreyLightColor,
-          inputBorderRadius: BorderRadius.all(Radius.circular(20)),
-          inputMargin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          inputPadding: EdgeInsets.all(10),
-          
-          inputTextDecoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: 'Start typing or speaking...',
-            hintStyle: TextStyle(
-              color: tBlackColor,
-              fontSize: 20,
+    return Scaffold(
+      body: ChatView(
+        currentUser: user,
+        chatController: _chatController,
+        onSendTap: _onSendTap,
+        chatViewState: ChatViewState.hasMessages,
+        chatViewStateConfig: ChatViewStateConfiguration(
+          loadingWidgetConfig: ChatViewStateWidgetConfiguration(
+            loadingIndicatorColor: theme.outgoingChatBubbleColor,
+          ),
+          onReloadButtonTap: () {},
+        ),
+        typeIndicatorConfig: TypeIndicatorConfiguration(
+          flashingCircleBrightColor: theme.flashingCircleBrightColor,
+          flashingCircleDarkColor: theme.flashingCircleDarkColor,
+        ),
+        chatBackgroundConfig: ChatBackgroundConfiguration(
+          messageTimeIconColor: theme.messageTimeIconColor,
+          messageTimeTextStyle: TextStyle(color: theme.messageTimeTextColor),
+          defaultGroupSeparatorConfig: DefaultGroupSeparatorConfiguration(
+            textStyle: TextStyle(
+              color: theme.chatHeaderColor,
+              fontSize: 17,
             ),
           ),
-        )
+          backgroundColor: theme.backgroundColor,
+        ),
+        sendMessageConfig: SendMessageConfiguration(
+          imagePickerIconsConfig: ImagePickerIconsConfiguration(
+            cameraIconColor: theme.cameraIconColor,
+            galleryIconColor: theme.galleryIconColor,
+          ),
+          replyMessageColor: theme.replyMessageColor,
+          defaultSendButtonColor: theme.sendButtonColor,
+          replyDialogColor: theme.replyDialogColor,
+          replyTitleColor: theme.replyTitleColor,
+          textFieldBackgroundColor: theme.textFieldBackgroundColor,
+          closeIconColor: theme.closeIconColor,
+          textFieldConfig: TextFieldConfiguration(
+            textStyle: TextStyle(color: theme.textFieldTextColor),
+          ),
+          micIconColor: theme.replyMicIconColor,
+          voiceRecordingConfiguration: VoiceRecordingConfiguration(
+            backgroundColor: theme.waveformBackgroundColor,
+            recorderIconColor: theme.recordIconColor,
+            waveStyle: WaveStyle(
+              showMiddleLine: false,
+              waveColor: theme.waveColor ?? Colors.white,
+              extendWaveform: true,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-  void _addMessage(types.Message message) {
-    setState(() {
-      _messages.insert(0, message);
-    });
-  }
-
-  void _handleSendPressed(types.PartialText message) {
-    final textMessage = types.TextMessage(
-      author: _user,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
+  Future<void> _onSendTap(String message, ReplyMessage replyMessage,
+      MessageType messageType) async {
+    final newMessage = Message(
       id: const Uuid().v4(),
-      text: message.text,
+      message: message,
+      createdAt: DateTime.now(),
+      sendBy: user.id,
+      replyMessage: replyMessage,
+      messageType: messageType,
     );
-    _addMessage(textMessage);
+    _chatController.addMessage(newMessage);
+    // conver message type to list<mapped>
+    // chat complete
+    final response = await _openAIChatCompletion();
+    if (response != null) {
+      final newMessage = Message(
+        id: const Uuid().v4(),
+        message: response.choices[0].message.content,
+        createdAt: DateTime.now(),
+        sendBy: bot.id,
+        replyMessage: replyMessage,
+        messageType: messageType,
+      );
+      _chatController.addMessage(newMessage);
+    }
   }
 }

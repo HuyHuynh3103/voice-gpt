@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:voice_gpt/router/router.dart';
+import 'package:flutter_config/flutter_config.dart';
 import 'package:voice_gpt/utils/theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FlutterConfig.loadEnvVariables();
   runApp(MainApp());
 }
 
