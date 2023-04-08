@@ -11,20 +11,18 @@ class ChatGptRepository {
     openAI = OpenAI.instance.build(
       token: FlutterConfig.get('OPENAI_API_KEY'),
       baseOption: HttpSetup(
-        receiveTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 20),
       ),
       isLog: true,
     );
-  }  
+  }
 
   Future<ChatCTResponse?> generate(
     List<Message> messageList,
   ) async {
     final messages = messageList
-        .map((e) => Map.of({
-              "role": e.isSender ? "user" : "assistant",
-              "content": e.content
-            }))
+        .map((e) => Map.of(
+            {"role": e.isSender ? "user" : "assistant", "content": e.content}))
         .toList();
     final request = ChatCompleteText(
       messages: messages,

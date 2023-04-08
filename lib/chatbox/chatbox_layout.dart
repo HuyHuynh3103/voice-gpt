@@ -36,47 +36,50 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
   // This is the main widget that will be displayed on the screen
   Widget _buildBody() {
     return BlocBuilder<ChatGptBloc, ChatState>(
-      bloc: _chatGptBloc,
-      builder: (context, state) {
-      // print(state);
-      if (state is ChatLoading) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (state is ChatLoaded) {
-        return Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: state.messageList.length,
-                itemBuilder: (context, index) {
-                  Message msg = state.messageList[index];
-                  return BubbleSpecialThree(
-                    text: msg.content,
-                    tail: true,
-                    isSender: msg.isSender,
-                    color: msg.isSender ? Color(0xFF1B97F3) : Color(0xFFE8E8EE),
-                    textStyle: msg.isSender
-                        ? TextStyle(color: Colors.white)
-                        : TextStyle(color: Colors.black),
-                  );
-                },
-              ),
-            ),
-            MessageBar(
-              onSend: (msg) {
-                context.read<ChatGptBloc>().add(SendMessage(msg));
-              },
-            )
-          ],
-        );
-      } else if (state is ChatFailure) {
-        return Center(
-            child: Text(
-          state.error,
-          style: const TextStyle(color: Colors.red),
-        ));
-      } else {
-        return const Center(child: Text('Something went wrong!'));
-      }
-    });
+        bloc: _chatGptBloc,
+        builder: (context, state) {
+          print(state);
+          if (state is ChatLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ChatLoaded) {
+
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: state.messageList.length,
+                    itemBuilder: (context, index) {
+                      Message msg = state.messageList[index];
+                      return BubbleSpecialThree(
+                        text: msg.content,
+                        tail: true,
+                        isSender: msg.isSender,
+                        color: msg.isSender
+                            ? Color(0xFF1B97F3)
+                            : Color(0xFFE8E8EE),
+                        textStyle: msg.isSender
+                            ? TextStyle(color: Colors.white)
+                            : TextStyle(color: Colors.black),
+                      );
+                    },
+                  ),
+                ),
+                MessageBar(
+                  onSend: (msg) {
+                    context.read<ChatGptBloc>().add(SendMessage(msg));
+                  },
+                )
+              ],
+            );
+          } else if (state is ChatFailure) {
+            return Center(
+                child: Text(
+              state.error,
+              style: const TextStyle(color: Colors.red),
+            ));
+          } else {
+            return const Center(child: Text('Something went wrong!'));
+          }
+        });
   }
 }

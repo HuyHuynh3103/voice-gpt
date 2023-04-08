@@ -21,6 +21,11 @@ class GenerateSuccess extends ChatState {
   final ChatCTResponse response;
   GenerateSuccess(this.response);
 }
+class Generating extends ChatState {
+  final String message;
+  Generating(this.message);
+}
+
 
 class ChatFailure extends ChatState {
   final String error;
