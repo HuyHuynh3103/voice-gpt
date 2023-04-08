@@ -20,7 +20,8 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
     add(LoadInitialMessage());
   }
 
-  Stream<ChatState> _mapLoadChatToState(LoadInitialMessage event, emit) async* {
+  Future<void> _mapLoadChatToState(
+      LoadInitialMessage event, Emitter<ChatState> emit) async {
     emit(ChatLoading());
     try {
       final messages = await localStorage.loadMessages();
@@ -30,7 +31,8 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  Stream<ChatState> _mapSendMessageToState(SendMessage event, emit) async* {
+  Future<void> _mapSendMessageToState(
+      SendMessage event, Emitter<ChatState> emit) async {
     try {
       final current = state;
       final List<Message> messageList =
@@ -54,5 +56,4 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
       emit(ChatFailure(e.toString()));
     }
   }
-
 }
