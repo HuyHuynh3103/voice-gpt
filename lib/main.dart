@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:voice_gpt/blocs/chat_gpt_bloc.dart';
+import 'package:voice_gpt/repository/chat_gpt.dart';
 import 'package:voice_gpt/repository/local_storage.dart';
 import 'package:voice_gpt/routing/router.dart';
 import 'package:flutter_config/flutter_config.dart';
@@ -9,10 +12,20 @@ void main() async {
   await FlutterConfig.loadEnvVariables();
   final localStorage = LocalStorage();
   await localStorage.init();
-  runApp(MainApp());
+  final chatGptRepository = ChatGptRepository();
+  chatGptRepository.init();
+  runApp(MainApp(
+    chatGptBloc: ChatGptBloc(
+      chatGptRepository: chatGptRepository,
+      localStorage: localStorage,
+    ),
+  ));
 }
 
 class MainApp extends StatelessWidget {
+  @override
+  final ChatGptBloc chatGptBloc;
+  const MainApp({Key? key, required this.chatGptBloc}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -21,6 +34,9 @@ class MainApp extends StatelessWidget {
       darkTheme: TAppTheme.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: routers,
+      builder: (context, child) {
+        return BlocProvider.value(value: chatGptBloc, child: child!);
+      },
     );
   }
 }

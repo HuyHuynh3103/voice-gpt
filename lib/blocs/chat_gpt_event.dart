@@ -14,11 +14,9 @@ class SendMessage extends ChatEvent {
   List<Object> get props => [message];
 }
 
-class loadInitialMessage extends ChatEvent {
-  const loadInitialMessage();
+class LoadInitialMessage extends ChatEvent {
+  const LoadInitialMessage();
 
   @override
   List<Object> get props => [];
 }
-
-

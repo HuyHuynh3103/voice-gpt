@@ -14,28 +14,23 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
     required this.chatGptRepository,
     required this.localStorage,
   }) : super(ChatInitial()) {
-    add(loadInitialMessage());
+    on<LoadInitialMessage>(_mapLoadChatToState);
+    on<SendMessage>(_mapSendMessageToState);
+
+    add(LoadInitialMessage());
   }
 
-  @override
-  Stream<ChatState> mapEventToState(ChatEvent event) async* {
-    if (event is loadInitialMessage) {
-      yield* _mapLoadChatToState();
-    } else if (event is SendMessage) {
-      yield* _mapSendMessageToState(event);
-    }
-  }
-
-  Stream<ChatState> _mapLoadChatToState() async* {
+  Stream<ChatState> _mapLoadChatToState(LoadInitialMessage event, emit) async* {
+    emit(ChatLoading());
     try {
       final messages = await localStorage.loadMessages();
-      yield ChatLoaded(messages);
+      emit(ChatLoaded(messages));
     } catch (e) {
-      yield ChatFailure(e.toString());
+      emit(ChatFailure(e.toString()));
     }
   }
 
-  Stream<ChatState> _mapSendMessageToState(SendMessage event) async* {
+  Stream<ChatState> _mapSendMessageToState(SendMessage event, emit) async* {
     try {
       final current = state;
       final List<Message> messageList =
@@ -54,9 +49,10 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
       }
       updateMessageList.add(botMessage);
       await localStorage.saveMessages(updateMessageList);
-      yield ChatLoaded(updateMessageList);
+      emit(ChatLoaded(updateMessageList));
     } catch (e) {
-      yield ChatFailure(e.toString());
+      emit(ChatFailure(e.toString()));
     }
   }
+
 }
