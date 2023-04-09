@@ -21,6 +21,7 @@ dependencies:
   intl: ^0.18.0
   shared_preferences: ^2.1.0
   speech_to_text: ^6.1.1
+  text_to_speech: ^0.2.3
   uuid: ^3.0.7
 
 dev_dependencies:

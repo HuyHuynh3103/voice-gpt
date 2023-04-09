@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:voice_gpt/blocs/chat_gpt_bloc.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_bloc.dart';
 import 'package:voice_gpt/repository/chat_gpt.dart';
 import 'package:voice_gpt/repository/local_storage.dart';
 import 'package:voice_gpt/routing/router.dart';

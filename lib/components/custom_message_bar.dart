@@ -95,7 +95,7 @@ class CustomMessageBar extends MessageBar {
                       maxLines: 3,
                       onChanged: onTextChanged,
                       decoration: InputDecoration(
-                        hintText: "Type your message here",
+                        hintText: "Start typing or talking ...",
                         hintMaxLines: 1,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 10),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:voice_gpt/blocs/chat_gpt_bloc.dart';
-import 'package:voice_gpt/blocs/chat_gpt_event.dart';
-import 'package:voice_gpt/blocs/chat_gpt_state.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_bloc.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_event.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_state.dart';
 import 'package:voice_gpt/components/custom_bubble.dart';
 import 'package:voice_gpt/components/custom_message_bar.dart';
 
@@ -67,7 +67,7 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
                   itemCount: state.messageList.length,
                   controller: _scrollController,
                   itemBuilder: (context, index) {
-                    return CustomBubble(
+                    return BubbleChat(
                       message: state.messageList[index],
                     );
                   },
