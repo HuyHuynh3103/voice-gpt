@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:voice_gpt/chatbox/chatbox_layout.dart';
+import 'package:voice_gpt/components/chatbox_layout.dart';
 import 'package:voice_gpt/common/colors.dart';
 
 class MessageChatPage extends StatefulWidget {

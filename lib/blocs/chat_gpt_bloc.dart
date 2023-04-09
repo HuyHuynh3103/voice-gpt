@@ -1,6 +1,7 @@
 // create a bloc for add new messages
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
 import 'package:voice_gpt/blocs/chat_gpt_event.dart';
 import 'package:voice_gpt/blocs/chat_gpt_state.dart';
 import 'package:voice_gpt/models/message_model.dart';
@@ -33,26 +34,40 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
 
   Future<void> _mapSendMessageToState(
       SendMessage event, Emitter<ChatState> emit) async {
-    emit(ChatLoading());
     try {
       final current = state;
       final List<Message> messageList =
           current is ChatLoaded ? current.messageList : [];
-      final sendMessage = Message(content: event.message, isSender: true);
+      final sendMessage = Message(
+        id: const Uuid().v4(),
+        content: event.message,
+        isSender: true,
+      );
 
       final updateMessageList = [...messageList, sendMessage];
-      final response = await chatGptRepository.generate(updateMessageList);
-      Message botMessage = Message(
-        content: "Sorry, I don't understand",
+      Message loadingMessage = Message(
+        id: const Uuid().v4(),
         isSender: false,
+        content: "Loading...",
+        isLoading: true,
       );
+      final loadingMessageList = [...updateMessageList, loadingMessage];
+      emit(ChatLoaded(loadingMessageList));
+
+      final response = await chatGptRepository.generate(updateMessageList);
+      final botMessage = Message(id: const Uuid().v4(), isSender: false);
       if (response != null) {
-        botMessage = Message(
-            content: response.choices[0].message.content, isSender: false);
+        botMessage.content = response.choices[0].message.content;
+      } else {
+        botMessage.content = "I'm sorry, I don't understand";
+        botMessage.isError = true;
       }
-      updateMessageList.add(botMessage);
-      await localStorage.saveMessages(updateMessageList);
-      emit(ChatLoaded(updateMessageList));
+      final responseMessageList = [
+        ...updateMessageList,
+        botMessage,
+      ];
+      await localStorage.saveMessages(responseMessageList);
+      emit(ChatLoaded(responseMessageList));
     } catch (e) {
       print(e.toString());
       emit(ChatFailure(e.toString()));

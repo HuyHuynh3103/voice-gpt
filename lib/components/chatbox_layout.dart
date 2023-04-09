@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:voice_gpt/blocs/chat_gpt_bloc.dart';
 import 'package:voice_gpt/blocs/chat_gpt_event.dart';
 import 'package:voice_gpt/blocs/chat_gpt_state.dart';
+import 'package:voice_gpt/components/custom_bubble.dart';
 import 'package:voice_gpt/models/message_model.dart';
 
 class ChatBoxLayout extends StatefulWidget {
@@ -42,24 +43,14 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
           if (state is ChatLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is ChatLoaded) {
-
             return Column(
               children: [
                 Expanded(
                   child: ListView.builder(
                     itemCount: state.messageList.length,
                     itemBuilder: (context, index) {
-                      Message msg = state.messageList[index];
-                      return BubbleSpecialThree(
-                        text: msg.content,
-                        tail: true,
-                        isSender: msg.isSender,
-                        color: msg.isSender
-                            ? Color(0xFF1B97F3)
-                            : Color(0xFFE8E8EE),
-                        textStyle: msg.isSender
-                            ? TextStyle(color: Colors.white)
-                            : TextStyle(color: Colors.black),
+                      return CustomBubble(
+                        message: state.messageList[index],
                       );
                     },
                   ),
