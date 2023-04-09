@@ -63,17 +63,32 @@ class _MessageChatPageState extends State<MessageChatPage> {
   Widget _buildSpeakButton(
     void Function() onPressed,
   ) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        padding: const EdgeInsets.all(20.0),
-        decoration: const BoxDecoration(
-          color: tPrimaryColor,
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.mic, color: tWhiteColor),
-      ),
-    );
+    return Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            GestureDetector(
+              onTap: onPressed,
+              child: Container(
+                padding: const EdgeInsets.all(20.0),
+                decoration: const BoxDecoration(
+                  color: tPrimaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.mic, color: tWhiteColor),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Text(
+                'Tap to speak',
+                style: TextStyle(color: tPrimaryColor, fontSize: 12.0),
+              ),
+            
+          ],
+        ));
   }
 
   Widget _buildHandFreeCheckbox(

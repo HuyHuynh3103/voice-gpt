@@ -2,14 +2,17 @@ class Message {
   String id;
   String content;
   bool isSender;
-  bool isLoading;
+  bool isTyping;
   bool isError;
+  DateTime createdAt;
+
   Message({
     required this.id,
     this.content = "",
     this.isSender = true,
-    this.isLoading = false,
+    this.isTyping = false,
     this.isError = false,
+    required this.createdAt,
   });
 
   static Message fromJson(Map<String, dynamic> json) {
@@ -17,6 +20,7 @@ class Message {
       id: json['id'],
       content: json['content'],
       isSender: json['isSender'],
+      createdAt: DateTime.parse(json['createdAt']),
     );
   }
 
@@ -25,6 +29,7 @@ class Message {
       'id': id,
       'content': content,
       'isSender': isSender,
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }

@@ -42,20 +42,25 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
         id: const Uuid().v4(),
         content: event.message,
         isSender: true,
+        createdAt: DateTime.now(),
       );
 
       final updateMessageList = [...messageList, sendMessage];
       Message loadingMessage = Message(
-        id: const Uuid().v4(),
-        isSender: false,
-        content: "Loading...",
-        isLoading: true,
-      );
+          id: const Uuid().v4(),
+          isSender: false,
+          content: "Loading...",
+          isTyping: true,
+          createdAt: DateTime.now());
       final loadingMessageList = [...updateMessageList, loadingMessage];
       emit(ChatLoaded(loadingMessageList));
 
       final response = await chatGptRepository.generate(updateMessageList);
-      final botMessage = Message(id: const Uuid().v4(), isSender: false);
+      final botMessage = Message(
+        id: const Uuid().v4(),
+        isSender: false,
+        createdAt: DateTime.now(),
+      );
       if (response != null) {
         botMessage.content = response.choices[0].message.content;
       } else {
