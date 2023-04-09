@@ -22,13 +22,11 @@ class _MessageChatPageState extends State<MessageChatPage> {
         ),
         actions: <Widget>[
           Center(
-            child: GestureDetector(
-                onTap: _navigateToSettingsPage,
-                child: IconButton(
+            child: IconButton(
                   icon: const Icon(Icons.settings),
-                  onPressed: () {},
+                  onPressed: _navigateToSettingsPage,
                   color: tPrimaryColor,
-                )),
+                ),
           ),
         ],
       ),
@@ -100,6 +98,6 @@ class _MessageChatPageState extends State<MessageChatPage> {
   }
 
   void _navigateToSettingsPage() {
-    context.go('/settings');
+    context.push('/settings');
   }
 }
