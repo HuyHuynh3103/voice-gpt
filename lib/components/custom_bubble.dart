@@ -1,7 +1,7 @@
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jumping_dot/jumping_dot.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:voice_gpt/common/colors.dart';
 import 'package:voice_gpt/models/message_model.dart';
 
@@ -56,10 +56,9 @@ class CustomBubble extends BubbleSpecialThree {
                 maxWidth: MediaQuery.of(context).size.width * 0.7,
               ),
               padding: const EdgeInsets.all(10),
-              child: const JumpingDots(
-                color: Color(0xFF1B97F3),
-                radius: 10,
-                numberOfDots: 3,
+              child: const SpinKitThreeBounce(
+                color: tPrimaryColor,
+                size: 20.0,
               ),
             ),
           ),
