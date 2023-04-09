@@ -13,10 +13,8 @@ class ChatBoxLayout extends StatefulWidget {
 
 class _ChatBoxLayoutState extends State<ChatBoxLayout> {
   final TextEditingController _controller = TextEditingController();
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   late ChatGptBloc _chatGptBloc;
-  bool isError = false;
-  String errorMessage = '';
   @override
   void initState() {
     super.initState();
@@ -74,32 +72,24 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
             ],
           );
         } else if (state is ChatFailure) {
-          if (!isError) {
-            setState(() {
-              isError = true;
-              errorMessage = state.error;
-            });
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Error'),
-                  content: Text(errorMessage),
-                  actions: <Widget>[
-                    TextButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        setState(() {
-                          isError = false;
-                        });
-                        Navigator.of(context).pop();
-                      },
-                    )
-                  ],
-                ),
-              );
-            });
-          }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Error'),
+                content: Text(state.error),
+                actions: <Widget>[
+                  TextButton(
+                    child: const Text('OK'),
+                    onPressed: () {
+                      _chatGptBloc.add(LoadInitialMessage());
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              ),
+            );
+          });
           return const SizedBox.shrink();
         } else {
           return const Center(child: Text('Something went wrong!'));
