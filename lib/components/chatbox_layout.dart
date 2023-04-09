@@ -1,14 +1,19 @@
-import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:voice_gpt/blocs/chat_gpt_bloc.dart';
 import 'package:voice_gpt/blocs/chat_gpt_event.dart';
 import 'package:voice_gpt/blocs/chat_gpt_state.dart';
 import 'package:voice_gpt/components/custom_bubble.dart';
+import 'package:voice_gpt/components/custom_message_bar.dart';
 
 class ChatBoxLayout extends StatefulWidget {
+  const ChatBoxLayout({Key? key}) : super(key: key);
   @override
   State<ChatBoxLayout> createState() => _ChatBoxLayoutState();
+
+  void addMessageFromSpeaker(String text) {
+    _ChatBoxLayoutState().addMessageFromSpeaker(text);
+  }
 }
 
 class _ChatBoxLayoutState extends State<ChatBoxLayout> {
@@ -19,6 +24,10 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
   void initState() {
     super.initState();
     _chatGptBloc = BlocProvider.of(context);
+  }
+
+  void addMessageFromSpeaker(String message) {
+    _controller.text = message;
   }
 
   @override
@@ -64,7 +73,8 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
                   },
                 ),
               ),
-              MessageBar(
+              CustomMessageBar(
+                textController: _controller,
                 onSend: (msg) {
                   context.read<ChatGptBloc>().add(SendMessage(msg));
                 },

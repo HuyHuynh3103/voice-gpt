@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:voice_gpt/components/chatbox_layout.dart';
 import 'package:voice_gpt/common/colors.dart';
+import 'package:voice_gpt/components/speak_button.dart';
 
 class MessageChatPage extends StatefulWidget {
   const MessageChatPage({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class _MessageChatPageState extends State<MessageChatPage> {
                 children: [_buildLanguageButton(() {})],
               )),
           const SizedBox(height: 10.0),
-          Expanded(child: ChatBoxLayout()),
+          const Expanded(child: ChatBoxLayout()),
         ],
       ),
       // bottom bar has speak button in middle and hand-free checkbox on right-hand side
@@ -50,7 +51,12 @@ class _MessageChatPageState extends State<MessageChatPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             const Spacer(),
-            _buildSpeakButton(() {}),
+            SpeakButton(onTextChanged: (String text) {
+              print('text: $text');
+              ChatBoxLayout chatBoxLayout =
+                  context.findAncestorWidgetOfExactType<ChatBoxLayout>()!;
+              chatBoxLayout.addMessageFromSpeaker(text);
+            }),
             const SizedBox(width: 60.0),
             _buildHandFreeCheckbox((bool? value) {}),
             const SizedBox(width: 10.0),
@@ -58,37 +64,6 @@ class _MessageChatPageState extends State<MessageChatPage> {
         ),
       ),
     );
-  }
-
-  Widget _buildSpeakButton(
-    void Function() onPressed,
-  ) {
-    return Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            GestureDetector(
-              onTap: onPressed,
-              child: Container(
-                padding: const EdgeInsets.all(20.0),
-                decoration: const BoxDecoration(
-                  color: tPrimaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.mic, color: tWhiteColor),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-                'Tap to speak',
-                style: TextStyle(color: tPrimaryColor, fontSize: 12.0),
-              ),
-            
-          ],
-        ));
   }
 
   Widget _buildHandFreeCheckbox(

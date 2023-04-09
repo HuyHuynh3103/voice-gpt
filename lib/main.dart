@@ -35,7 +35,9 @@ class MainApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       routerConfig: routers,
       builder: (context, child) {
-        return BlocProvider.value(value: chatGptBloc, child: child!);
+        return MultiBlocProvider(providers: [
+          BlocProvider.value(value: chatGptBloc),
+        ], child: child!);
       },
     );
   }

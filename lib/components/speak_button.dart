@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:voice_gpt/common/colors.dart';
@@ -21,35 +21,49 @@ class _SpeakButtonState extends State<SpeakButton> {
     _speech = SpeechToText();
   }
 
+  /// This has to happen only once per app
+
   void _listen() async {
     if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => {
-          setState(() {
-            _isListening = val == 'listening';
-          })
-        },
-        onError: (val) => print('error: $val'),
-      );
+      bool available = await _speech.initialize(onStatus: (val) {
+        setState(() {
+          _isListening = val == 'done';
+          _speech.stop();
+        });
+      }, onError: (val) {
+        print('onError: $val');
+        setState(() {
+          _isListening = false;
+          _speech.stop();
+        });
+      });
+      print('available: $available');
+      print('isListening: $_isListening');
+      print('text: $_text');
       if (available) {
-        setState(() => _isListening = true);
-        _speech.listen(
-          onResult: (val) {
+        setState(() {
+          _isListening = true;
+        });
+        _speech.listen(onResult: (val) {
+          print('onResult: $val');
+          setState(() {
+            _text = val.recognizedWords;
+          });
+
+          if (val.finalResult) {
+            widget.onTextChanged(_text);
             setState(() {
-              _text = val.recognizedWords;
+              _isListening = false;
+              _text = '';
             });
-            if (val.finalResult) {
-              setState(() {
-                _isListening = false;
-              });
-              widget.onTextChanged(_text);
-            }
-          },
-        );
+          }
+        });
       }
     } else {
-      setState(() => _isListening = false);
-      _speech.stop();
+      setState(() {
+        _isListening = false;
+        _speech.stop();
+      });
     }
   }
 
@@ -60,15 +74,24 @@ class _SpeakButtonState extends State<SpeakButton> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          GestureDetector(
-            onTap: _listen,
+          AvatarGlow(
+            animate: _isListening,
+            endRadius: 20,
+            repeat: true,
+            glowColor: tPrimaryColor,
+            duration: const Duration(milliseconds: 2000),
             child: Container(
-              padding: const EdgeInsets.all(20.0),
               decoration: const BoxDecoration(
                 color: tPrimaryColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.mic, color: tWhiteColor),
+              child: IconButton(
+                icon: Icon(
+                  _isListening ? Icons.mic : Icons.mic_none,
+                  color: Colors.white,
+                ),
+                onPressed: _listen,
+              ),
             ),
           ),
           const SizedBox(
