@@ -125,15 +125,14 @@ class _MessageChatPageState extends State<MessageChatPage> {
                 items:
                     languages.map<DropdownMenuItem<Language>>((Language value) {
                   return DropdownMenuItem<Language>(
-                    value: value,
-                    child: Row(
-                      children: <Widget>[
-                        Image.asset(value.flag),
-                        const SizedBox(width: 10.0),
-                        Text(value.name),
-                      ],
-                    )
-                  );
+                      value: value,
+                      child: Row(
+                        children: <Widget>[
+                          Image.asset(value.flag),
+                          const SizedBox(width: 10.0),
+                          Text(value.name),
+                        ],
+                      ));
                 }).toList(),
               ),
             );

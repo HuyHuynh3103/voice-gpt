@@ -17,7 +17,6 @@ class SpeakButton extends StatefulWidget {
 class _SpeakButtonState extends State<SpeakButton> {
   late SpeechToText _speech;
   bool _isListening = false;
-  String _text = '';
   @override
   void initState() {
     super.initState();
@@ -44,12 +43,10 @@ class _SpeakButtonState extends State<SpeakButton> {
         _speech.listen(
           onResult: (val) {
             setState(() {
-              _text = val.recognizedWords;
+              widget.onTextChanged(val.recognizedWords);
               if (val.finalResult) {
-                widget.onTextChanged(_text);
                 setState(() {
                   _isListening = false;
-                  _text = '';
                 });
               }
             });
