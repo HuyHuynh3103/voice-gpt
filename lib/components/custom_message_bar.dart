@@ -99,7 +99,7 @@ class CustomMessageBar extends MessageBar {
                         hintMaxLines: 1,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 10),
-                        hintStyle: TextStyle(
+                        hintStyle: const TextStyle(
                           fontSize: 16,
                         ),
                         fillColor: Colors.white,

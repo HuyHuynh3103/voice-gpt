@@ -53,7 +53,7 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
           isTyping: true,
           createdAt: DateTime.now());
       final loadingMessageList = [...updateMessageList, loadingMessage];
-      emit(ChatLoaded(loadingMessageList));
+      emit(ChatLoaded(loadingMessageList, status: ChatStatus.gptGenerating));
 
       final response = await chatGptRepository.generate(updateMessageList);
       final botMessage = Message(
@@ -72,7 +72,7 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
         botMessage,
       ];
       await localStorage.saveMessages(responseMessageList);
-      emit(ChatLoaded(responseMessageList));
+      emit(ChatLoaded(responseMessageList, status: ChatStatus.gptGenerated));
     } catch (e) {
       print(e.toString());
       emit(ChatFailure(e.toString()));

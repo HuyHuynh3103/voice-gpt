@@ -71,12 +71,9 @@ class _MessageChatPageState extends State<MessageChatPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             const Spacer(),
-            SpeakButton(onTextChanged: (String text) {
-              print('response : $text');
-              setState(() {
-                _textController.text = text;
-              });
-            }),
+            SpeakButton(
+              controller: _textController,
+            ),
             const SizedBox(width: 60.0),
             _buildHandFreeCheckbox(),
             const SizedBox(width: 10.0),

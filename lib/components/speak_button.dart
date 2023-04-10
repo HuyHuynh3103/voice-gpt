@@ -2,13 +2,15 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_bloc.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_event.dart';
 import 'package:voice_gpt/blocs/setting/setting_bloc.dart';
 import 'package:voice_gpt/blocs/setting/setting_state.dart';
 import 'package:voice_gpt/common/colors.dart';
 
 class SpeakButton extends StatefulWidget {
-  final Function(String) onTextChanged;
-  SpeakButton({required this.onTextChanged});
+  TextEditingController controller;
+  SpeakButton({required this.controller});
 
   @override
   State<SpeakButton> createState() => _SpeakButtonState();
@@ -16,16 +18,19 @@ class SpeakButton extends StatefulWidget {
 
 class _SpeakButtonState extends State<SpeakButton> {
   late SpeechToText _speech;
+  late ChatGptBloc _chatGptBloc;
   bool _isListening = false;
+
   @override
   void initState() {
     super.initState();
     _speech = SpeechToText();
+    _chatGptBloc = BlocProvider.of<ChatGptBloc>(context);
   }
 
   /// This has to happen only once per app
 
-  void _listen(SettingLoaded _setting) async {
+  Future<void> _listen(SettingLoaded setting) async {
     if (!_isListening) {
       bool available = await _speech.initialize(
         onStatus: (val) => print('onStatus: $val'),
@@ -39,20 +44,15 @@ class _SpeakButtonState extends State<SpeakButton> {
       if (available) {
         setState(() {
           _isListening = true;
+          _speech.listen(
+            onResult: (val) {
+              setState(() {
+                widget.controller.text = val.recognizedWords;
+              });
+            },
+            localeId: setting.currentLanguage.code,
+          );
         });
-        _speech.listen(
-          onResult: (val) {
-            setState(() {
-              widget.onTextChanged(val.recognizedWords);
-              if (val.finalResult) {
-                setState(() {
-                  _isListening = false;
-                });
-              }
-            });
-          },
-          localeId: _setting.currentLanguage.code,
-        );
       }
     } else {
       setState(() {
@@ -62,11 +62,17 @@ class _SpeakButtonState extends State<SpeakButton> {
     }
   }
 
-  void turnOff() async {
-    _speech.stop();
-    setState(() {
-      _isListening = false;
-    });
+  void turnOffAndSend() {
+    if (_isListening) {
+      setState(() {
+        _isListening = false;
+        _speech.stop();
+      });
+      if (widget.controller.text.isNotEmpty) {
+        _chatGptBloc.add(SendMessage(widget.controller.text));
+        widget.controller.clear();
+      }
+    }
   }
 
   @override
@@ -83,19 +89,26 @@ class _SpeakButtonState extends State<SpeakButton> {
             glowColor: tPrimaryColor,
             duration: const Duration(milliseconds: 2000),
             child: Container(
+              width: 50,
               decoration: const BoxDecoration(
                 color: tPrimaryColor,
                 shape: BoxShape.circle,
               ),
-              child: IconButton(
-                icon: Icon(
-                  _isListening ? Icons.mic : Icons.mic_none,
-                  color: Colors.white,
+              child: GestureDetector(
+                child: Center(
+                  child: Icon(
+                    _isListening ? Icons.mic : Icons.mic_none,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
-                onPressed: _isListening
-                    ? turnOff
-                    : () => _listen(
-                        context.read<SettingBloc>().state as SettingLoaded),
+                onTapDown: (TapDownDetails details) async {
+                  await _listen(BlocProvider.of<SettingBloc>(context).state
+                      as SettingLoaded);
+                },
+                onTapUp: (TapUpDetails details) {
+                  turnOffAndSend();
+                },
               ),
             ),
           ),
@@ -103,7 +116,7 @@ class _SpeakButtonState extends State<SpeakButton> {
             height: 10,
           ),
           const Text(
-            'Tap to speak',
+            'Hold to speak',
             style: TextStyle(color: tPrimaryColor, fontSize: 12.0),
           ),
         ],

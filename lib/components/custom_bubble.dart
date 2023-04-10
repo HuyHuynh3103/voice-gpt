@@ -30,6 +30,10 @@ class BubbleChat extends StatefulWidget {
     tts.setPitch(1.0);
     tts.setRate(0.8);
     tts.setVolume(1.0);
+
+    if (isReading) {
+      tts.speak(message.content);
+    }
   }
 
   @override
@@ -41,13 +45,28 @@ class _BubbleChatState extends State<BubbleChat> {
   @override
   void initState() {
     isPlaying = widget.isReading;
+    super.initState();
+  }
 
-    if (isPlaying) {
-      widget.tts.speak(
+  void read() async {
+    print("Read $isPlaying");
+    if (!isPlaying) {
+      setState(() {
+        isPlaying = true;
+      });
+      await widget.tts.speak(
         widget._bubble.text,
       );
+      setState(() {
+        isPlaying = false;
+      });
+    } else {
+      
+      await widget.tts.stop();
+      setState(() {
+        isPlaying = false;
+      });
     }
-    super.initState();
   }
 
   @override
@@ -70,18 +89,7 @@ class _BubbleChatState extends State<BubbleChat> {
                   color: tPrimaryColor,
                 ),
                 color: tPrimaryColor,
-                onPressed: () {
-                  setState(() {
-                    isPlaying = !isPlaying;
-                    if (isPlaying) {
-                      widget.tts.speak(
-                        widget._bubble.text,
-                      );
-                    } else {
-                      widget.tts.stop();
-                    }
-                  });
-                },
+                onPressed: read,
               ),
             ),
         ],
