@@ -20,6 +20,7 @@ class _SpeakButtonState extends State<SpeakButton> {
   late SpeechToText _speech;
   late ChatGptBloc _chatGptBloc;
   bool _isListening = false;
+  String _text = '';
 
   @override
   void initState() {
@@ -36,29 +37,33 @@ class _SpeakButtonState extends State<SpeakButton> {
       if (available) {
         setState(() {
           _isListening = true;
-          _speech.listen(
-            onResult: (val) {
-              setState(() {
-                widget.controller.text = val.recognizedWords;
-              });
-            },
-            localeId: setting.currentLanguage.code,
-          );
         });
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _text = val.recognizedWords;
+              widget.controller.text = _text;
+            });
+          },
+          localeId: setting.currentLanguage.code,
+        );
       }
-    }
-  }
-
-  void turnOffAndSend() {
-    if (_isListening) {
+    } else {
       setState(() {
         _isListening = false;
         _speech.stop();
       });
-      if (widget.controller.text.isNotEmpty) {
-        _chatGptBloc.add(SendMessage(widget.controller.text));
-        widget.controller.clear();
-      }
+    }
+  }
+
+  void turnOffAndSend() {
+    setState(() {
+      _isListening = false;
+      _speech.stop();
+    });
+    if (_text.isNotEmpty) {
+      widget.controller.clear();
+      _chatGptBloc.add(SendMessage(_text));
     }
   }
 

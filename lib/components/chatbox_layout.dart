@@ -55,6 +55,7 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
         if (state is ChatLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ChatLoaded) {
+          widget.controller.clear();
           return Column(
             children: [
               Expanded(
