@@ -1,7 +1,9 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:voice_gpt/common/colors.dart';
+import 'package:voice_gpt/repository/setting.dart';
 
 class SpeakButton extends StatefulWidget {
   final Function(String) onTextChanged;
@@ -23,41 +25,36 @@ class _SpeakButtonState extends State<SpeakButton> {
 
   /// This has to happen only once per app
 
-  void _listen() async {
+  void _listen(Setting _setting) async {
     if (!_isListening) {
-      bool available = await _speech.initialize(onStatus: (val) {
-        setState(() {
-          _isListening = val == 'done';
-          _speech.stop();
-        });
-      }, onError: (val) {
-        print('onError: $val');
-        setState(() {
-          _isListening = false;
-          _speech.stop();
-        });
-      });
-      print('available: $available');
-      print('isListening: $_isListening');
-      print('text: $_text');
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => () {
+          print('onError: $val');
+          setState(() {
+            _isListening = false;
+          });
+        },
+      );
       if (available) {
         setState(() {
           _isListening = true;
         });
-        _speech.listen(onResult: (val) {
-          print('onResult: $val');
-          setState(() {
-            _text = val.recognizedWords;
-          });
-
-          if (val.finalResult) {
-            widget.onTextChanged(_text);
+        _speech.listen(
+          onResult: (val) {
             setState(() {
-              _isListening = false;
-              _text = '';
+              _text = val.recognizedWords;
+              if (val.finalResult) {
+                widget.onTextChanged(_text);
+                setState(() {
+                  _isListening = false;
+                  _text = '';
+                });
+              }
             });
-          }
-        });
+          },
+          localeId: _setting.currentLanguage,
+        );
       }
     } else {
       setState(() {
@@ -67,8 +64,16 @@ class _SpeakButtonState extends State<SpeakButton> {
     }
   }
 
+  void turnOff() async {
+    _speech.stop();
+    setState(() {
+      _isListening = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    Setting _setting = Provider.of<Setting>(context);
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: Column(
@@ -90,7 +95,7 @@ class _SpeakButtonState extends State<SpeakButton> {
                   _isListening ? Icons.mic : Icons.mic_none,
                   color: Colors.white,
                 ),
-                onPressed: _listen,
+                onPressed: _isListening ? turnOff : () => _listen(_setting),
               ),
             ),
           ),

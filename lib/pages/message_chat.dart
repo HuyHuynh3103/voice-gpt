@@ -12,21 +12,26 @@ class MessageChatPage extends StatefulWidget {
 }
 
 class _MessageChatPageState extends State<MessageChatPage> {
+  final TextEditingController _textController = TextEditingController();
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: tWhiteColor,
-        title: const Center(
-          child: Text('Chat', style: TextStyle(color: tBlackColor)),
-        ),
+        title: const Text('Chat', style: TextStyle(color: tBlackColor)),
         actions: <Widget>[
           Center(
             child: IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: _navigateToSettingsPage,
-                  color: tPrimaryColor,
-                ),
+              icon: const Icon(Icons.settings),
+              onPressed: _navigateToSettingsPage,
+              color: tPrimaryColor,
+            ),
           ),
         ],
       ),
@@ -40,7 +45,10 @@ class _MessageChatPageState extends State<MessageChatPage> {
                 children: [_buildLanguageButton(() {})],
               )),
           const SizedBox(height: 10.0),
-          const Expanded(child: ChatBoxLayout()),
+          Expanded(
+              child: ChatBoxLayout(
+            controller: _textController,
+          )),
         ],
       ),
       // bottom bar has speak button in middle and hand-free checkbox on right-hand side
@@ -51,9 +59,9 @@ class _MessageChatPageState extends State<MessageChatPage> {
             const Spacer(),
             SpeakButton(onTextChanged: (String text) {
               print('text: $text');
-              ChatBoxLayout chatBoxLayout =
-                  context.findAncestorWidgetOfExactType<ChatBoxLayout>()!;
-              chatBoxLayout.addMessageFromSpeaker(text);
+              setState(() {
+                _textController.text = text;
+              });
             }),
             const SizedBox(width: 60.0),
             _buildHandFreeCheckbox((bool? value) {}),

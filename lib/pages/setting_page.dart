@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:voice_gpt/common/colors.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:voice_gpt/repository/setting.dart';
 
 class SettingPage extends StatefulWidget {
   @override
@@ -8,6 +10,13 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
+  late Setting _setting;
+  @override
+  void initState() {
+    super.initState();
+    _setting = Provider.of<Setting>(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,10 +62,14 @@ class _SettingPageState extends State<SettingPage> {
             width: 50.0,
             height: 25.0,
             toggleSize: 20.0,
-            value: true,
+            value: _setting.isAutoTTS,
             borderRadius: 30.0,
             padding: 2.0,
-            onToggle: (bool value) {},
+            onToggle: (bool value) {
+              setState(() {
+                _setting.toggleAutoTTS();
+              });
+            },
           )
         ],
       ),
@@ -90,7 +103,12 @@ class _SettingPageState extends State<SettingPage> {
   // Implement _buildDeleteAll()
   Widget _buildDeleteAll() {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        print('Delete all messages');
+        _setting.clearMessages();
+
+        Navigator.pop(context);
+      },
       child: Container(
         height: 50.0,
         decoration: const BoxDecoration(
