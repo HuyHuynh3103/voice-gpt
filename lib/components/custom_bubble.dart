@@ -11,6 +11,7 @@ class BubbleChat extends StatefulWidget {
   late BubbleSpecialThree _bubble;
   String currentLanguage;
   bool isReading;
+  TextToSpeech tts = TextToSpeech();
   BubbleChat(
       {super.key,
       required this.message,
@@ -25,6 +26,10 @@ class BubbleChat extends StatefulWidget {
           ? const TextStyle(color: Colors.white)
           : const TextStyle(color: Colors.black),
     );
+    tts.setLanguage(currentLanguage);
+    tts.setPitch(1.0);
+    tts.setRate(0.8);
+    tts.setVolume(1.0);
   }
 
   @override
@@ -32,18 +37,13 @@ class BubbleChat extends StatefulWidget {
 }
 
 class _BubbleChatState extends State<BubbleChat> {
-  TextToSpeech tts = TextToSpeech();
   late bool isPlaying;
   @override
   void initState() {
     isPlaying = widget.isReading;
-    tts.setLanguage(widget.currentLanguage);
-    tts.setPitch(1.0);
-    tts.setRate(0.8);
-    tts.setVolume(1.0);
 
     if (isPlaying) {
-      tts.speak(
+      widget.tts.speak(
         widget._bubble.text,
       );
     }
@@ -74,11 +74,11 @@ class _BubbleChatState extends State<BubbleChat> {
                   setState(() {
                     isPlaying = !isPlaying;
                     if (isPlaying) {
-                      tts.speak(
+                      widget.tts.speak(
                         widget._bubble.text,
                       );
                     } else {
-                      tts.stop();
+                      widget.tts.stop();
                     }
                   });
                 },
