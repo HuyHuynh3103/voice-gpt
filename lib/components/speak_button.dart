@@ -32,15 +32,7 @@ class _SpeakButtonState extends State<SpeakButton> {
 
   Future<void> _listen(SettingLoaded setting) async {
     if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => () {
-          print('onError: $val');
-          setState(() {
-            _isListening = false;
-          });
-        },
-      );
+      bool available = await _speech.initialize();
       if (available) {
         setState(() {
           _isListening = true;
@@ -54,11 +46,6 @@ class _SpeakButtonState extends State<SpeakButton> {
           );
         });
       }
-    } else {
-      setState(() {
-        _isListening = false;
-        _speech.stop();
-      });
     }
   }
 
