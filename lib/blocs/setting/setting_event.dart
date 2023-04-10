@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:voice_gpt/common/language.dart';
 
 abstract class SettingEvent extends Equatable {
   const SettingEvent();
@@ -11,7 +12,7 @@ class LoadSetting extends SettingEvent {}
 
 
 class ToggleLanguage extends SettingEvent {
-  final String language;
+  final Language language;
 
   const ToggleLanguage(this.language);
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:voice_gpt/blocs/setting/setting_bloc.dart';
 import 'package:voice_gpt/blocs/setting/setting_event.dart';
 import 'package:voice_gpt/blocs/setting/setting_state.dart';
+import 'package:voice_gpt/common/language.dart';
 import 'package:voice_gpt/components/chatbox_layout.dart';
 import 'package:voice_gpt/common/colors.dart';
 import 'package:voice_gpt/components/speak_button.dart';
@@ -34,6 +35,7 @@ class _MessageChatPageState extends State<MessageChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: tWhiteColor,
         title: const Text('Chat', style: TextStyle(color: tBlackColor)),
         actions: <Widget>[
@@ -53,7 +55,7 @@ class _MessageChatPageState extends State<MessageChatPage> {
               color: tGreyLightColor,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [_buildLanguageButton(() {})],
+                children: [_buildLanguageButton()],
               )),
           const SizedBox(height: 10.0),
           Expanded(
@@ -105,23 +107,41 @@ class _MessageChatPageState extends State<MessageChatPage> {
     );
   }
 
-  Widget _buildLanguageButton(
-    void Function() onPressed,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Row(
-          children: <Widget>[
-            Image.asset('assets/countries/us.png'),
-            const SizedBox(width: 5.0),
-            const Text('US-EN'),
-            const Icon(Icons.arrow_drop_down),
-          ],
-        ),
-      ),
-    );
+  Widget _buildLanguageButton() {
+    return BlocBuilder(
+        builder: (context, state) {
+          if (state is SettingLoaded) {
+            return Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: DropdownButton<Language>(
+                value: state.currentLanguage,
+                elevation: 16,
+                style: const TextStyle(color: tPrimaryColor),
+                onChanged: (Language? newValue) {
+                  context
+                      .read<SettingBloc>()
+                      .add(ToggleLanguage(newValue ?? languages[0]));
+                },
+                items:
+                    languages.map<DropdownMenuItem<Language>>((Language value) {
+                  return DropdownMenuItem<Language>(
+                    value: value,
+                    child: Row(
+                      children: <Widget>[
+                        Image.asset(value.flag),
+                        const SizedBox(width: 10.0),
+                        Text(value.name),
+                      ],
+                    )
+                  );
+                }).toList(),
+              ),
+            );
+          } else {
+            return const SizedBox();
+          }
+        },
+        bloc: _settingBloc);
   }
 
   void _navigateToSettingsPage() {

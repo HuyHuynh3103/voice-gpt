@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:voice_gpt/blocs/setting/setting_event.dart';
 import 'package:voice_gpt/blocs/setting/setting_state.dart';
+import 'package:voice_gpt/common/language.dart';
 import 'package:voice_gpt/repository/local_storage.dart';
 
 class SettingBloc extends Bloc<SettingEvent, SettingState> {
@@ -20,8 +21,9 @@ class SettingBloc extends Bloc<SettingEvent, SettingState> {
     try {
       final isAutoTTS = await localStorage.isAutoTTS;
       final language = await localStorage.speechLanguage;
-
-      emit(SettingLoaded(isAutoTTS, language));
+      print("isAutoTTS: $isAutoTTS");
+      print("language: $language");
+      emit(SettingLoaded(isAutoTTS, Language.fromCode(language)));
     } catch (e) {
       emit(SettingFailure(e.toString()));
     }
@@ -30,11 +32,11 @@ class SettingBloc extends Bloc<SettingEvent, SettingState> {
   Future<void> _mapChangeLanguageToState(
       ToggleLanguage event, Emitter<SettingState> emit) async {
     try {
-      await localStorage.saveLanguage(event.language);
+      await localStorage.saveLanguage(event.language.code);
       emit(
         SettingLoaded(
           await localStorage.isAutoTTS,
-          await localStorage.speechLanguage,
+          Language.fromCode(await localStorage.speechLanguage),
         ),
       );
     } catch (e) {
@@ -49,7 +51,7 @@ class SettingBloc extends Bloc<SettingEvent, SettingState> {
       emit(
         SettingLoaded(
           await localStorage.isAutoTTS,
-          await localStorage.speechLanguage,
+          Language.fromCode(await localStorage.speechLanguage),
         ),
       );
     } catch (e) {
@@ -64,7 +66,7 @@ class SettingBloc extends Bloc<SettingEvent, SettingState> {
       emit(
         SettingLoaded(
           await localStorage.isAutoTTS,
-          await localStorage.speechLanguage,
+          Language.fromCode(await localStorage.speechLanguage),
         ),
       );
     } catch (e) {

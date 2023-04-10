@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:voice_gpt/common/language.dart';
 
 abstract class SettingState extends Equatable {
   const SettingState();
@@ -11,7 +12,7 @@ class SettingInitial extends SettingState {}
 
 class SettingLoaded extends SettingState {
   final bool isAutoTTS;
-  final String currentLanguage;
+  final Language currentLanguage;
 
   const SettingLoaded(this.isAutoTTS, this.currentLanguage);
 

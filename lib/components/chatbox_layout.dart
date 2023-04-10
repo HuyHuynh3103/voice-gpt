@@ -28,6 +28,12 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(body: _buildBody());
   }
@@ -49,7 +55,6 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
         if (state is ChatLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ChatLoaded) {
-          WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
           return Column(
             children: [
               Expanded(
@@ -57,6 +62,9 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
                   bloc: _settingBloc,
                   builder: (context, settingState) {
                     if (settingState is SettingLoaded) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _scrollToEnd();
+                      });
                       return ListView.builder(
                         itemCount: state.messageList.length,
                         controller: _scrollController,
@@ -72,7 +80,7 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
                           return BubbleChat(
                             message: state.messageList[index],
                             isReading: isReading,
-                            currentLanguage: settingState.currentLanguage,
+                            currentLanguage: settingState.currentLanguage.code,
                           );
                         },
                       );
@@ -81,7 +89,6 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
                     }
                   },
                 ),
-
               ),
               CustomMessageBar(
                 textController: widget.controller,

@@ -54,7 +54,7 @@ class _SpeakButtonState extends State<SpeakButton> {
               }
             });
           },
-          localeId: _setting.currentLanguage,
+          localeId: _setting.currentLanguage.code,
         );
       }
     } else {
