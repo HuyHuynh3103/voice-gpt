@@ -8,28 +8,30 @@ import 'package:text_to_speech/text_to_speech.dart';
 
 class BubbleChat extends StatefulWidget {
   Message message;
-  BubbleChat({super.key, required this.message});
+  late BubbleSpecialThree _bubble;
+  
+  BubbleChat({super.key, required this.message}) {
+    _bubble = BubbleSpecialThree(
+      text: message.content,
+      tail: true,
+      isSender: message.isSender,
+      color: message.isSender ? tPrimaryColor : const Color(0xFFE8E8EE),
+      textStyle: message.isSender
+          ? const TextStyle(color: Colors.white)
+          : const TextStyle(color: Colors.black),
+    );
+  }
 
   @override
   State<BubbleChat> createState() => _BubbleChatState();
 }
 
 class _BubbleChatState extends State<BubbleChat> {
-  late BubbleSpecialThree _bubble;
   TextToSpeech tts = TextToSpeech();
   bool isPlaying = true;
   final String defaultLanguage = 'en-US';
   @override
   void initState() {
-    _bubble = BubbleSpecialThree(
-      text: widget.message.content,
-      tail: true,
-      isSender: widget.message.isSender,
-      color: widget.message.isSender ? tPrimaryColor : const Color(0xFFE8E8EE),
-      textStyle: widget.message.isSender
-          ? const TextStyle(color: Colors.white)
-          : const TextStyle(color: Colors.black),
-    );
     tts.setLanguage(defaultLanguage);
     tts.setPitch(1.0);
     tts.setRate(0.8);
@@ -42,10 +44,10 @@ class _BubbleChatState extends State<BubbleChat> {
     if (!widget.message.isTyping) {
       return Row(
         mainAxisAlignment:
-            _bubble.isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+            widget._bubble.isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           _buildCustomMessage(context),
-          if (!_bubble.isSender)
+          if (!widget._bubble.isSender)
             Padding(
               padding: const EdgeInsets.only(left: 1.0),
               child: IconButton(
@@ -59,7 +61,7 @@ class _BubbleChatState extends State<BubbleChat> {
                 onPressed: () {
                   if (isPlaying) {
                     tts.speak(
-                      _bubble.text,
+                      widget._bubble.text,
                   
                     );
                     setState(() {
@@ -78,15 +80,15 @@ class _BubbleChatState extends State<BubbleChat> {
 
   Widget _buildIsTypingMessage() {
     return Align(
-      alignment: _bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+      alignment: widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: CustomPaint(
           painter: SpecialChatBubbleThree(
-            color: _bubble.color,
+            color: widget._bubble.color,
             alignment:
-                _bubble.isSender ? Alignment.topRight : Alignment.topLeft,
-            tail: _bubble.tail,
+                widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+            tail: widget._bubble.tail,
           ),
           child: Container(
             constraints: BoxConstraints(
@@ -106,7 +108,7 @@ class _BubbleChatState extends State<BubbleChat> {
   Widget _buildCustomMessage(BuildContext context) {
     bool stateTick = false;
     Icon? stateIcon;
-    if (_bubble.sent) {
+    if (widget._bubble.sent) {
       stateTick = true;
       stateIcon = const Icon(
         Icons.done,
@@ -114,7 +116,7 @@ class _BubbleChatState extends State<BubbleChat> {
         color: Color(0xFF97AD8E),
       );
     }
-    if (_bubble.delivered) {
+    if (widget._bubble.delivered) {
       stateTick = true;
       stateIcon = const Icon(
         Icons.done_all,
@@ -122,7 +124,7 @@ class _BubbleChatState extends State<BubbleChat> {
         color: Color(0xFF97AD8E),
       );
     }
-    if (_bubble.seen) {
+    if (widget._bubble.seen) {
       stateTick = true;
       stateIcon = const Icon(
         Icons.done_all,
@@ -132,22 +134,22 @@ class _BubbleChatState extends State<BubbleChat> {
     }
 
     return Align(
-      alignment: _bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+      alignment: widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: CustomPaint(
           painter: SpecialChatBubbleThree(
-            color: _bubble.color,
+            color: widget._bubble.color,
             alignment:
-                _bubble.isSender ? Alignment.topRight : Alignment.topLeft,
-            tail: _bubble.tail,
+                widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+            tail: widget._bubble.tail,
           ),
           child: Container(
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * .7,
               minWidth: MediaQuery.of(context).size.width * .3,
             ),
-            margin: _bubble.isSender
+            margin: widget._bubble.isSender
                 ? stateTick
                     ? const EdgeInsets.fromLTRB(7, 7, 14, 7)
                     : const EdgeInsets.fromLTRB(7, 7, 17, 7)
@@ -162,8 +164,8 @@ class _BubbleChatState extends State<BubbleChat> {
                           ? const EdgeInsets.only(left: 4, right: 20)
                           : const EdgeInsets.only(left: 4, right: 4),
                       child: Text(
-                        _bubble.text,
-                        style: _bubble.textStyle,
+                        widget._bubble.text,
+                        style: widget._bubble.textStyle,
                         textAlign: TextAlign.left,
                       ),
                     ),
@@ -186,7 +188,7 @@ class _BubbleChatState extends State<BubbleChat> {
                   DateFormat('hh:mm a').format(widget.message.createdAt),
                   style: TextStyle(
                     fontSize: 12,
-                    color: _bubble.textStyle.color,
+                    color: widget._bubble.textStyle.color,
                   ),
                 ),
               ],
