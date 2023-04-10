@@ -7,33 +7,19 @@ import 'package:voice_gpt/components/custom_bubble.dart';
 import 'package:voice_gpt/components/custom_message_bar.dart';
 
 class ChatBoxLayout extends StatefulWidget {
-  const ChatBoxLayout({Key? key}) : super(key: key);
+  final TextEditingController controller;
+  ChatBoxLayout({Key? key, required this.controller}) : super(key: key);
   @override
   State<ChatBoxLayout> createState() => _ChatBoxLayoutState();
-
-  void addMessageFromSpeaker(String text) {
-    _ChatBoxLayoutState().addMessageFromSpeaker(text);
-  }
 }
 
 class _ChatBoxLayoutState extends State<ChatBoxLayout> {
-  final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late ChatGptBloc _chatGptBloc;
   @override
   void initState() {
     super.initState();
     _chatGptBloc = BlocProvider.of(context);
-  }
-
-  void addMessageFromSpeaker(String message) {
-    _controller.text = message;
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -59,6 +45,8 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
         if (state is ChatLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ChatLoaded) {
+          print(
+              "messageList: ${state.messageList.map((e) => e.content).toList()}");
           WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
           return Column(
             children: [
@@ -74,7 +62,7 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
                 ),
               ),
               CustomMessageBar(
-                textController: _controller,
+                textController: widget.controller,
                 onSend: (msg) {
                   context.read<ChatGptBloc>().add(SendMessage(msg));
                 },

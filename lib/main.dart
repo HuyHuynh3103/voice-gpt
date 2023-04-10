@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_bloc.dart';
 import 'package:voice_gpt/repository/chat_gpt.dart';
 import 'package:voice_gpt/repository/local_storage.dart';
+import 'package:voice_gpt/repository/setting.dart';
 import 'package:voice_gpt/routing/router.dart';
 import 'package:flutter_config/flutter_config.dart';
 import 'package:voice_gpt/utils/theme.dart';
@@ -37,6 +39,7 @@ class MainApp extends StatelessWidget {
       builder: (context, child) {
         return MultiBlocProvider(providers: [
           BlocProvider.value(value: chatGptBloc),
+          ChangeNotifierProvider<Setting>(create: (_) => Setting())
         ], child: child!);
       },
     );
