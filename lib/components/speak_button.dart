@@ -1,9 +1,10 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:voice_gpt/blocs/setting/setting_bloc.dart';
+import 'package:voice_gpt/blocs/setting/setting_state.dart';
 import 'package:voice_gpt/common/colors.dart';
-import 'package:voice_gpt/repository/setting.dart';
 
 class SpeakButton extends StatefulWidget {
   final Function(String) onTextChanged;
@@ -25,7 +26,7 @@ class _SpeakButtonState extends State<SpeakButton> {
 
   /// This has to happen only once per app
 
-  void _listen(Setting _setting) async {
+  void _listen(SettingLoaded _setting) async {
     if (!_isListening) {
       bool available = await _speech.initialize(
         onStatus: (val) => print('onStatus: $val'),
@@ -73,7 +74,6 @@ class _SpeakButtonState extends State<SpeakButton> {
 
   @override
   Widget build(BuildContext context) {
-    Setting _setting = Provider.of<Setting>(context);
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: Column(
@@ -95,7 +95,10 @@ class _SpeakButtonState extends State<SpeakButton> {
                   _isListening ? Icons.mic : Icons.mic_none,
                   color: Colors.white,
                 ),
-                onPressed: _isListening ? turnOff : () => _listen(_setting),
+                onPressed: _isListening
+                    ? turnOff
+                    : () => _listen(
+                        context.read<SettingBloc>().state as SettingLoaded),
               ),
             ),
           ),

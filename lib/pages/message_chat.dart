@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:voice_gpt/blocs/setting/setting_bloc.dart';
+import 'package:voice_gpt/blocs/setting/setting_event.dart';
+import 'package:voice_gpt/blocs/setting/setting_state.dart';
 import 'package:voice_gpt/components/chatbox_layout.dart';
 import 'package:voice_gpt/common/colors.dart';
 import 'package:voice_gpt/components/speak_button.dart';
@@ -13,10 +17,17 @@ class MessageChatPage extends StatefulWidget {
 
 class _MessageChatPageState extends State<MessageChatPage> {
   final TextEditingController _textController = TextEditingController();
+  late SettingBloc _settingBloc;
   @override
   void dispose() {
     _textController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _settingBloc = context.read<SettingBloc>();
   }
 
   @override
@@ -46,9 +57,10 @@ class _MessageChatPageState extends State<MessageChatPage> {
               )),
           const SizedBox(height: 10.0),
           Expanded(
-              child: ChatBoxLayout(
-            controller: _textController,
-          )),
+            child: ChatBoxLayout(
+              controller: _textController,
+            ),
+          ),
         ],
       ),
       // bottom bar has speak button in middle and hand-free checkbox on right-hand side
@@ -58,13 +70,13 @@ class _MessageChatPageState extends State<MessageChatPage> {
           children: <Widget>[
             const Spacer(),
             SpeakButton(onTextChanged: (String text) {
-              print('text: $text');
+              print('response : $text');
               setState(() {
                 _textController.text = text;
               });
             }),
             const SizedBox(width: 60.0),
-            _buildHandFreeCheckbox((bool? value) {}),
+            _buildHandFreeCheckbox(),
             const SizedBox(width: 10.0),
           ],
         ),
@@ -72,17 +84,24 @@ class _MessageChatPageState extends State<MessageChatPage> {
     );
   }
 
-  Widget _buildHandFreeCheckbox(
-    void Function(bool? value) onChanged,
-  ) {
-    return Row(
-      children: <Widget>[
-        const Text('Hand-free'),
-        Checkbox(
-          value: false,
-          onChanged: onChanged,
-        ),
-      ],
+  Widget _buildHandFreeCheckbox() {
+    return BlocBuilder(
+      bloc: _settingBloc,
+      builder: (context, state) => Row(
+        children: <Widget>[
+          const Text('Hand-free'),
+          Checkbox(
+            checkColor: tWhiteColor,
+            activeColor: tPrimaryColor,
+            value: state is SettingLoaded ? state.isAutoTTS : false,
+            onChanged: (bool? value) {
+              if (value != null) {
+                _settingBloc.add(SetHandFree(value));
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_bloc.dart';
+import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_event.dart';
+import 'package:voice_gpt/blocs/setting/setting_bloc.dart';
+import 'package:voice_gpt/blocs/setting/setting_event.dart';
+import 'package:voice_gpt/blocs/setting/setting_state.dart';
 import 'package:voice_gpt/common/colors.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:voice_gpt/repository/setting.dart';
 
 class SettingPage extends StatefulWidget {
   @override
@@ -10,11 +15,13 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  late Setting _setting;
+  late ChatGptBloc _chatGptBloc;
+  late SettingBloc _settingBloc;
   @override
   void initState() {
     super.initState();
-    _setting = Provider.of<Setting>(context);
+    _chatGptBloc = context.read<ChatGptBloc>();
+    _settingBloc = context.read<SettingBloc>();
   }
 
   @override
@@ -44,36 +51,43 @@ class _SettingPageState extends State<SettingPage> {
 
   // Implement _buildAutoTTS()
   Widget _buildAutoTTS() {
-    return Container(
-      height: 50.0,
-      decoration: const BoxDecoration(
-        color: tGreyLightColor,
-        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          const Padding(
-            padding: EdgeInsets.only(left: 20.0),
-            child: Text('Auto TTS replies', style: TextStyle(fontSize: 16.0)),
-          ),
-          FlutterSwitch(
-            activeColor: tPrimaryColor,
-            width: 50.0,
-            height: 25.0,
-            toggleSize: 20.0,
-            value: _setting.isAutoTTS,
-            borderRadius: 30.0,
-            padding: 2.0,
-            onToggle: (bool value) {
-              setState(() {
-                _setting.toggleAutoTTS();
-              });
-            },
-          )
-        ],
-      ),
-    );
+    return BlocBuilder(
+        builder: (context, state) {
+          print('state: $state');
+          if (state is SettingLoaded) {
+            return Container(
+              height: 50.0,
+              decoration: const BoxDecoration(
+                color: tGreyLightColor,
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  const Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: Text('Auto TTS replies',
+                        style: TextStyle(fontSize: 16.0)),
+                  ),
+                  FlutterSwitch(
+                    activeColor: tPrimaryColor,
+                    width: 50.0,
+                    height: 25.0,
+                    toggleSize: 20.0,
+                    value: state.isAutoTTS,
+                    borderRadius: 30.0,
+                    padding: 2.0,
+                    onToggle: (bool value) {
+                      context.read<SettingBloc>().add(SetHandFree(value));
+                    },
+                  )
+                ],
+              ),
+            );
+          }
+          return const SizedBox();
+        },
+        bloc: _settingBloc);
   }
 
   // Implement _buildSpeechLanguage()
@@ -104,10 +118,9 @@ class _SettingPageState extends State<SettingPage> {
   Widget _buildDeleteAll() {
     return GestureDetector(
       onTap: () {
-        print('Delete all messages');
-        _setting.clearMessages();
-
-        Navigator.pop(context);
+        _settingBloc.add(ClearMessages());
+        _chatGptBloc.add(const LoadInitialMessage());
+        context.pop();
       },
       child: Container(
         height: 50.0,

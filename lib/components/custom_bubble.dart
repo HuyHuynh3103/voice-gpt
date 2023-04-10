@@ -9,8 +9,13 @@ import 'package:text_to_speech/text_to_speech.dart';
 class BubbleChat extends StatefulWidget {
   Message message;
   late BubbleSpecialThree _bubble;
-
-  BubbleChat({super.key, required this.message}) {
+  String currentLanguage;
+  bool isReading;
+  BubbleChat(
+      {super.key,
+      required this.message,
+      required this.currentLanguage,
+      this.isReading = false}) {
     _bubble = BubbleSpecialThree(
       text: message.content,
       tail: true,
@@ -28,14 +33,20 @@ class BubbleChat extends StatefulWidget {
 
 class _BubbleChatState extends State<BubbleChat> {
   TextToSpeech tts = TextToSpeech();
-  bool isPlaying = true;
-  final String defaultLanguage = 'en-US';
+  late bool isPlaying;
   @override
   void initState() {
-    tts.setLanguage(defaultLanguage);
+    isPlaying = widget.isReading;
+    tts.setLanguage(widget.currentLanguage);
     tts.setPitch(1.0);
     tts.setRate(0.8);
     tts.setVolume(1.0);
+
+    if (isPlaying) {
+      tts.speak(
+        widget._bubble.text,
+      );
+    }
     super.initState();
   }
 
@@ -53,22 +64,22 @@ class _BubbleChatState extends State<BubbleChat> {
               padding: const EdgeInsets.only(left: 1.0),
               child: IconButton(
                 icon: Icon(
-                  !isPlaying
+                  isPlaying
                       ? Icons.pause_circle_outline
                       : Icons.play_circle_outline,
                   color: tPrimaryColor,
                 ),
                 color: tPrimaryColor,
                 onPressed: () {
-                  if (isPlaying) {
-                    tts.speak(
-                      widget._bubble.text,
-                    );
-                  } else {
-                    tts.stop();
-                  }
                   setState(() {
                     isPlaying = !isPlaying;
+                    if (isPlaying) {
+                      tts.speak(
+                        widget._bubble.text,
+                      );
+                    } else {
+                      tts.stop();
+                    }
                   });
                 },
               ),

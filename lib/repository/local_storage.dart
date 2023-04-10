@@ -37,16 +37,16 @@ class LocalStorage {
     return [];
   }
 
-  Future<String?> get currentSpeechLanguage async {
-    return _prefs.getString(speechLanguageKey);
+  Future<String> get speechLanguage async {
+    return _prefs.getString(speechLanguageKey) ?? "en-US";
   }
 
   Future<bool> saveLanguage(String language) async {
     return _prefs.setString(speechLanguageKey, language);
   }
 
-  Future<bool?> get isAutoTTS async {
-    return _prefs.getBool(isAutoTTSKey);
+  Future<bool> get isAutoTTS async {
+    return _prefs.getBool(isAutoTTSKey) ?? false;
   }
 
   Future<bool> saveIsAutoTTS(bool isAutoTTS) async {
@@ -54,6 +54,7 @@ class LocalStorage {
   }
 
   Future<void> clearMessages() async {
+    // clear all messages in local storage
     await _prefs.remove(messageKey);
   }
 }

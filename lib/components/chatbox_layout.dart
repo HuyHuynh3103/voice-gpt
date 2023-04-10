@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_bloc.dart';
 import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_event.dart';
 import 'package:voice_gpt/blocs/chat_gpt/chat_gpt_state.dart';
+import 'package:voice_gpt/blocs/setting/setting_bloc.dart';
+import 'package:voice_gpt/blocs/setting/setting_state.dart';
 import 'package:voice_gpt/components/custom_bubble.dart';
 import 'package:voice_gpt/components/custom_message_bar.dart';
+import 'package:voice_gpt/models/message_model.dart';
 
 class ChatBoxLayout extends StatefulWidget {
   final TextEditingController controller;
@@ -16,10 +19,12 @@ class ChatBoxLayout extends StatefulWidget {
 class _ChatBoxLayoutState extends State<ChatBoxLayout> {
   final ScrollController _scrollController = ScrollController();
   late ChatGptBloc _chatGptBloc;
+  late SettingBloc _settingBloc;
   @override
   void initState() {
     super.initState();
     _chatGptBloc = BlocProvider.of(context);
+    _settingBloc = BlocProvider.of(context);
   }
 
   @override
@@ -41,25 +46,42 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
     return BlocBuilder<ChatGptBloc, ChatState>(
       bloc: _chatGptBloc,
       builder: (context, state) {
-        print(state);
         if (state is ChatLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ChatLoaded) {
-          print(
-              "messageList: ${state.messageList.map((e) => e.content).toList()}");
           WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
           return Column(
             children: [
               Expanded(
-                child: ListView.builder(
-                  itemCount: state.messageList.length,
-                  controller: _scrollController,
-                  itemBuilder: (context, index) {
-                    return BubbleChat(
-                      message: state.messageList[index],
-                    );
+                child: BlocBuilder<SettingBloc, SettingState>(
+                  bloc: _settingBloc,
+                  builder: (context, settingState) {
+                    if (settingState is SettingLoaded) {
+                      return ListView.builder(
+                        itemCount: state.messageList.length,
+                        controller: _scrollController,
+                        itemBuilder: (context, index) {
+                          bool isReading = false;
+                          Message message = state.messageList[index];
+                          if (!message.isSender &&
+                              !message.isTyping &&
+                              message.id == state.messageList.last.id) {
+                            isReading = settingState.isAutoTTS;
+                            print('isReading: $isReading');
+                          }
+                          return BubbleChat(
+                            message: state.messageList[index],
+                            isReading: isReading,
+                            currentLanguage: settingState.currentLanguage,
+                          );
+                        },
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
                   },
                 ),
+
               ),
               CustomMessageBar(
                 textController: widget.controller,

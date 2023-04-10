@@ -71,8 +71,6 @@ class ChatGptBloc extends Bloc<ChatEvent, ChatState> {
         ...updateMessageList,
         botMessage,
       ];
-      print(
-          "responseMessageList: ${responseMessageList.map((e) => e.content).toList()}");
       await localStorage.saveMessages(responseMessageList);
       emit(ChatLoaded(responseMessageList));
     } catch (e) {
