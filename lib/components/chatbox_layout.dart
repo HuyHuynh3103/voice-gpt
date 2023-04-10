@@ -73,7 +73,8 @@ class _ChatBoxLayoutState extends State<ChatBoxLayout> {
                           bool isReading = false;
                           Message message = state.messageList[index];
                           if (message.id == state.messageList.last.id &&
-                              state.status == ChatStatus.gptGenerated) {
+                              state.status == ChatStatus.gptGenerated
+                            ) {
                             isReading = settingState.isAutoTTS;
                             print('isReading: $isReading');
                           }

@@ -60,11 +60,11 @@ class _SpeakButtonState extends State<SpeakButton> {
     setState(() {
       _isListening = false;
       _speech.stop();
+      if (_text.isNotEmpty) {
+        widget.controller.clear();
+        _chatGptBloc.add(SendMessage(_text));
+      }
     });
-    if (_text.isNotEmpty) {
-      widget.controller.clear();
-      _chatGptBloc.add(SendMessage(_text));
-    }
   }
 
   @override
