@@ -9,7 +9,7 @@ import 'package:text_to_speech/text_to_speech.dart';
 class BubbleChat extends StatefulWidget {
   Message message;
   late BubbleSpecialThree _bubble;
-  
+
   BubbleChat({super.key, required this.message}) {
     _bubble = BubbleSpecialThree(
       text: message.content,
@@ -43,8 +43,9 @@ class _BubbleChatState extends State<BubbleChat> {
   Widget build(BuildContext context) {
     if (!widget.message.isTyping) {
       return Row(
-        mainAxisAlignment:
-            widget._bubble.isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: widget._bubble.isSender
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           _buildCustomMessage(context),
           if (!widget._bubble.isSender)
@@ -62,12 +63,13 @@ class _BubbleChatState extends State<BubbleChat> {
                   if (isPlaying) {
                     tts.speak(
                       widget._bubble.text,
-                  
                     );
-                    setState(() {
-                      isPlaying = false;
-                    });
+                  } else {
+                    tts.stop();
                   }
+                  setState(() {
+                    isPlaying = !isPlaying;
+                  });
                 },
               ),
             ),
@@ -80,14 +82,16 @@ class _BubbleChatState extends State<BubbleChat> {
 
   Widget _buildIsTypingMessage() {
     return Align(
-      alignment: widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+      alignment:
+          widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: CustomPaint(
           painter: SpecialChatBubbleThree(
             color: widget._bubble.color,
-            alignment:
-                widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+            alignment: widget._bubble.isSender
+                ? Alignment.topRight
+                : Alignment.topLeft,
             tail: widget._bubble.tail,
           ),
           child: Container(
@@ -134,14 +138,16 @@ class _BubbleChatState extends State<BubbleChat> {
     }
 
     return Align(
-      alignment: widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+      alignment:
+          widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: CustomPaint(
           painter: SpecialChatBubbleThree(
             color: widget._bubble.color,
-            alignment:
-                widget._bubble.isSender ? Alignment.topRight : Alignment.topLeft,
+            alignment: widget._bubble.isSender
+                ? Alignment.topRight
+                : Alignment.topLeft,
             tail: widget._bubble.tail,
           ),
           child: Container(
